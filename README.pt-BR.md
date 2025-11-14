@@ -136,5 +136,4 @@ breaker.on(RelayEvents.FAILURE, (error) => {
 ```
 ## 📜 Licença
 Distribuído sob a [Licença MIT](LICENSE).
-
-Copyright (c) 2025 João Neto - [DevEtto](https://github.com/Dev-Etto)
+Copyright (c) 2025 João Neto - [DevEtto](https://github.com/Dev-Etto).
