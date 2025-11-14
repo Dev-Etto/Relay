@@ -1,77 +1,79 @@
-# Reley
+Read this in other languages: [Português (Brasil)](./README.pt-BR.md)
 
-![NPM Version](https://img.shields.io/npm/v/reley)
-![Build Status](https://img.shields.io/github/actions/workflow/status/[SEU-NOME-AQUI]/reley/.github/main.yml?branch=main)
-![Test Coverage](https://img.shields.io/codecov/c/github/[SEU-NOME-AQUI]/reley)
-![NPM Downloads](https://img.shields.io/npm/dm/reley)
+# Relay
 
-Uma biblioteca de Circuit Breaker **leve**, **zero-dependência** e **moderna** para Node.js, construída com foco em `async/await` e Typescript.
+![NPM Version](https://img.shields.io/npm/v/relay)
+![Build Status](https://img.shields.io/github/actions/workflow/status/Dev-Etto/relay/.github/workflows/main.yml?branch=main)
+![Test Coverage](https://img.shields.io/codecov/c/github/Dev-Etto/relay)
+![NPM Downloads](https://img.shields.io/npm/dm/relay)
+
+A **lightweight**, **zero-dependency**, and **modern** Circuit Breaker library for Node.js, built with a focus on `async/await` and TypeScript.
 
 ---
 
-## 💡 Por que usar o reley?
+## 💡 Why use Relay?
 
-Proteger suas aplicações contra falhas em serviços externos não deveria exigir a instalação de bibliotecas pesadas e complexas.
+Protecting your applications from failures in external services shouldn't require installing heavy and complex libraries.
 
-* **⚡ Leveza Extrema:** Zero dependências. O tamanho da biblioteca é minúsculo.
-* **🔌 API Moderna:** Uma API limpa e intuitiva que usa `async/await` e `...rest parameters`, sem `null`s estranhos.
-* **🛡️ Resiliência (Fail-Fast):** Impede que sua aplicação trave ao tentar chamar serviços que já estão offline, falhando rapidamente.
-* **🎧 Observabilidade:** Emitie eventos para que você possa logar e monitorar a saúde dos seus circuitos (usando `EventEmitter`).
-* **🎯 TypeScript Nativo:** Escrito inteiramente em TypeScript para uma excelente experiência de desenvolvimento.
+*   **⚡ Extremely Lightweight:** Zero dependencies. The library size is tiny.
+*   **🔌 Modern API:** A clean and intuitive API that uses `async/await` and `...rest parameters`.
+*   **🛡️ Resilience (Fail-Fast):** Prevents your application from hanging while trying to call services that are already offline by failing quickly.
+*   **🎧 Observability:** Emits events so you can log and monitor the health of your circuits (using `EventEmitter`).
+*   **🎯 Native TypeScript:** Written entirely in TypeScript for an excellent developer experience.
 
-## 📦 Instalação
+## 📦 Installation
 
 ```bash
-npm install reley
+npm install relay
 ```
 
-## 🚀 Uso Rápido
+## 🚀 Quick Start
 ```ts
-import { CircuitBreaker, CircuitOpenError } from '[NOME-DA-LIB-AQUI]';
+import { CircuitBreaker, CircuitOpenError } from 'relay';
 
-// 1. Crie uma instância
+// 1. Create an instance
 const breaker = new CircuitBreaker();
 
-// 2. Defina sua função assíncrona
-async function calcularFrete(cep) {
-  // ... sua lógica de chamada fetch()
+// 2. Define your asynchronous function
+async function calculateShipping(zipCode) {
+  // ...your fetch() call logic
 }
 
-// 3. Execute sua função protegida
+// 3. Execute your protected function
 try {
-  const frete = await breaker.exec(calcularFrete, '01001-000');
-  console.log('Frete:', frete);
+  const shippingCost = await breaker.exec(calculateShipping, '01001-000');
+  console.log('Shipping:', shippingCost);
 
 } catch (error) {
-  // 4. Trate erros de circuito aberto
+  // 4. Handle open-circuit errors
   if (error instanceof CircuitOpenError) {
-    console.warn('Serviço de frete indisponível, falha rápida.');
+    console.warn('Shipping service unavailable, failing fast.');
   } else {
-    console.error('Falha na chamada:', error.message);
+    console.error('Call failed:', error.message);
   }
 }
 ```
 
-## 📚 API e Padrões de Uso
+## 📚 API and Usage Patterns
 
 1. `exec(fn, ...args)`
 
-## Este é o método principal. Ele recebe a função a ser executada e repassa todos os argumentos subsequentes para ela.
+## This is the main method. It receives the function to be executed and passes all subsequent arguments to it.
 
-Com uma Função Simples
-Você pode passar qualquer função que retorne uma Promise.
+# With a Simple Function
+You can pass any function that returns a Promise.
 
 ```ts
-async function buscarUsuario(id) {
-  // ... retorna Promise<Usuario>
+async function findUser(id) {
+  // ...returns Promise<User>
 }
 
-// O segundo argumento (123) é passado como 'id' para buscarUsuario
-const usuario = await breaker.exec(buscarUsuario, 123);
+// The second argument (123) is passed as 'id' to findUser
+const user = await breaker.exec(findUser, 123);
 ```
 
-## Com um Método de Classe
-Ao proteger um método de classe (que depende de this), use .bind() para garantir que o contexto (this) seja preservado.
+## With a Class Method
+When protecting a class method (which depends on **this**), use **.bind()** to ensure that the context (**this**) is preserved.
 
 ```ts
 class ApiClient {
@@ -79,58 +81,59 @@ class ApiClient {
     this.apiKey = apiKey;
   }
   
-  async chamarApi(dados) {
-    // ... usa this.apiKey para fazer a chamada
+  async fetchApi(data) {
+    // ...uses this.apiKey to make the call
   }
 }
 
 const apiClient = new ApiClient('sk_123');
 
-// Use .bind(apiClient) para "grudar" o contexto
-const resultado = await breaker.exec(
-  apiClient.chamarApi.bind(apiClient), 
-  { valor: 100 } // argumento 'dados'
+// Use .bind(apiClient) to "bind" the context
+const result = await breaker.exec(
+  apiClient.fetchApi.bind(apiClient), 
+  { value: 100 } // 'data' argument
 );
 ```
-## 2. Configuração new CircuitBreaker(options)
-Você pode personalizar o comportamento do disjuntor no construtor.
+## 2. Configuration new CircuitBreaker(options)
+You can customize the breaker's behavior in the constructor.
 
 ```ts
 const options = {
-  // 3 falhas seguidas abrem o circuito (Default: 5)
+  // 3 consecutive failures open the circuit (Default: 5)
   failureThreshold: 3, 
   
-  // 10s de cooldown antes de tentar de novo (Default: 30000ms)
+  // 10s cooldown before retrying (Default: 30000ms)
   cooldownPeriod: 10000, 
   
-  // Timeout de 5s para a execução da função (Default: 10000ms)
+  // 5s timeout for the function execution (Default: 10000ms)
   executionTimeout: 5000, 
 };
 
 const breaker = new CircuitBreaker(options);
 ```
 
-## 3. Observabilidade (Eventos)
-O CircuitBreaker herda de EventEmitter. Você pode ouvir eventos para logar e monitorar o estado do circuito.
+## 3. Observability (Events)
+**CircuitBreaker** extends **EventEmitter**. You can listen for events to log and monitor the circuit's state.
 
 ```ts
-import { CircuitEvents } from '[NOME-DA-LIB-AQUI]';
+import { CircuitEvents } from 'relay';
 
 breaker.on(CircuitEvents.OPEN, (error) => {
-  logger.error(' CIRCUITO ABERTO. As chamadas serão bloqueadas.', error);
+  logger.error(' CIRCUIT OPEN. Calls will be blocked.', error);
 });
 
 breaker.on(CircuitEvents.CLOSE, () => {
-  logger.info(' CIRCUITO FECHADO. As chamadas voltaram ao normal.');
+  logger.info(' CIRCUIT CLOSED. Calls are back to normal.');
 });
 
 breaker.on(CircuitEvents.HALF_OPEN, () => {
-  logger.warn(' CIRCUITO MEIO-ABERTO. Testando a próxima chamada.');
+  logger.warn(' CIRCUIT HALF-OPEN. Testing the next call.');
 });
 
 breaker.on(CircuitEvents.FAILURE, (error) => {
-  logger.warn('Falha na chamada (Circuit Breaker)', error.message);
+  logger.warn('Call failed (Circuit Breaker)', error.message);
 });
 ```
-## 📜 Licença
-Distribuído sob a [Licença MIT](LICENSE).
+
+## 📜 License
+Distributed under the [Licença MIT](LICENSE).
