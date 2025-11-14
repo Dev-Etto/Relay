@@ -1,0 +1,39 @@
+{
+  "name": "relay",
+  "version": "0.1.0",
+  "description": "A lightweight, zero-dependency, and modern Circuit Breaker library for Node.js.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+"scripts": {
+    "build": "tsc",
+    "test": "jest"
+  },
+  "keywords": [
+    "circuit-breaker",
+    "resilience",
+    "fault-tolerance",
+    "async",
+    "typescript",
+    "zero-dependency"
+  ],
+  "author": "João Neto - contato.devetto@gmail.com",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Dev-Etto/relay.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Dev-Etto/relay/issues"
+  },
+  "homepage": "https://github.com/Dev-Etto/relay#readme",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^20.0.0",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.0.0"
+  }
+}
