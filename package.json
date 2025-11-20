@@ -23,7 +23,15 @@
     "fault-tolerance",
     "async",
     "typescript",
-    "zero-dependency"
+    "zero-dependency",
+    "microservices",
+    "reliability",
+    "stability",
+    "fail-fast",
+    "decorators",
+    "backend",
+    "nodejs",
+    "api-wrapper"
   ],
   "author": "João Neto - contato.devetto@gmail.com",
   "license": "MIT",

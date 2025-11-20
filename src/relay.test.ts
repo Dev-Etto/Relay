@@ -22,6 +22,11 @@ describe('Relay', () => {
     relay = new Relay();
   });
 
+  afterEach(() => {
+    Relay.clearDefault();
+    jest.clearAllTimers();
+  });
+
   it('should start in the CLOSED state', () => {
     expect(relay.state).toBe(RelayState.CLOSED);
   });
@@ -304,4 +309,38 @@ describe('Relay', () => {
       jest.advanceTimersByTime(coolDownPeriod);
       expect(relay.state).toBe(RelayState.HALF_OPEN);
     });
+});
+
+describe('Relay Register', () => {
+  let relay: Relay;
+
+  beforeEach(() => {
+    relay = new Relay({ failureThreshold: 1 });
+  });
+
+  it('should use registered fallback for a function', async () => {
+    const primary = jest.fn(async () => { throw new Error('fail'); });
+    const fallback = jest.fn(async () => 'fallback');
+
+    relay.register('test', primary, fallback);
+
+    await expect(relay.run(primary)).resolves.toBe('fallback');
+    expect(fallback).toHaveBeenCalled();
+  });
+
+  it('should use registered fallback for object methods', async () => {
+    class Primary {
+      async exec() { throw new Error('fail'); }
+    }
+    class Fallback {
+      async exec() { return 'fallback'; }
+    }
+
+    const p = new Primary();
+    const f = new Fallback();
+
+    relay.register('test-obj', p, f);
+    
+    await expect(relay.run(p.exec)).resolves.toBe('fallback');
+  });
 });
