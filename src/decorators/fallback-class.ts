@@ -9,6 +9,7 @@ export function FallbackClass<T extends { new (...args: any[]): {} }>(
   FallbackClass: T
 ): any {
   return function <U extends { new (...args: any[]): {} }>(constructor: U): any {
+    const fallbackInstanceSymbol = Symbol('fallbackInstance');
     const prototype = constructor.prototype;
     const methodNames = Object.getOwnPropertyNames(prototype);
 
@@ -18,30 +19,31 @@ export function FallbackClass<T extends { new (...args: any[]): {} }>(
       const descriptor = Object.getOwnPropertyDescriptor(prototype, methodName);
       if (descriptor && typeof descriptor.value === 'function') {
         const originalMethod = descriptor.value;
+        const isAsync = originalMethod.constructor.name === 'AsyncFunction';
 
-        descriptor.value = async function (...args: any[]) {
-          try {
-            return await originalMethod.apply(this, args);
-          } catch (error) {
-            const fallbackInstanceSymbol = Symbol.for('fallbackInstance');
-            
-            if (!(this as any)[fallbackInstanceSymbol]) {
-              (this as any)[fallbackInstanceSymbol] = new FallbackClass();
+        if (isAsync) {
+          descriptor.value = async function (...args: any[]) {
+            try {
+              return await originalMethod.apply(this, args);
+            } catch (error) {
+              if (!(this as any)[fallbackInstanceSymbol]) {
+                (this as any)[fallbackInstanceSymbol] = new FallbackClass();
+              }
+              
+              const fallbackInstance = (this as any)[fallbackInstanceSymbol];
+              
+              const fallbackMethod = (fallbackInstance as any)[methodName];
+              
+              if (typeof fallbackMethod === 'function') {
+                return fallbackMethod.call(fallbackInstance, error, ...args);
+              }
+              
+              throw error;
             }
-            
-            const fallbackInstance = (this as any)[fallbackInstanceSymbol];
-            
-            const fallbackMethod = (fallbackInstance as any)[methodName];
-            
-            if (typeof fallbackMethod === 'function') {
-              return fallbackMethod.call(fallbackInstance, error, ...args);
-            }
-            
-            throw error;
-          }
-        };
+          };
 
-        Object.defineProperty(prototype, methodName, descriptor);
+          Object.defineProperty(prototype, methodName, descriptor);
+        }
       }
     }
 

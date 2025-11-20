@@ -83,12 +83,21 @@ export class Relay<TFallback = any> extends EventEmitter {
    * @param primary The primary object or function.
    * @param fallback The fallback object or function.
    */
-  public register(primary: any, fallback: any) {
+  public register<
+    P extends (...args: any[]) => Promise<any>,
+    F extends (error: Error, ...args: Parameters<P>) => Promise<any>
+  >(primary: P, fallback: F): void;
+  public register<P extends object, F extends object>(primary: P, fallback: F): void;
+  public register(primary: any, fallback: any): void {
     if (typeof primary === 'function' && typeof fallback === 'function') {
       this.#fallbackRegistry.set(primary, fallback);
     } else if (typeof primary === 'object' && typeof fallback === 'object') {
-      const methods = Object.getOwnPropertyNames(Object.getPrototypeOf(primary));
-      for (const method of methods) {
+      const methodNames =
+        Object.getPrototypeOf(primary) === Object.prototype
+          ? Object.getOwnPropertyNames(primary) // For object literals
+          : Object.getOwnPropertyNames(Object.getPrototypeOf(primary)); // For class instances
+
+      for (const method of methodNames) {
         if (
           method !== 'constructor' &&
           typeof primary[method] === 'function' &&

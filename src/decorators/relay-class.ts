@@ -15,12 +15,15 @@ export function RelayClass(relay: Relay): any {
       const descriptor = Object.getOwnPropertyDescriptor(prototype, methodName);
       if (descriptor && typeof descriptor.value === 'function') {
         const originalMethod = descriptor.value;
+        const isAsync = originalMethod.constructor.name === 'AsyncFunction';
 
-        descriptor.value = async function (...args: any[]) {
-          return relay.run(originalMethod.bind(this), ...args);
-        };
+        if (isAsync) {
+          descriptor.value = async function (...args: any[]) {
+            return relay.run(originalMethod.bind(this), ...args);
+          };
 
-        Object.defineProperty(prototype, methodName, descriptor);
+          Object.defineProperty(prototype, methodName, descriptor);
+        }
       }
     }
 

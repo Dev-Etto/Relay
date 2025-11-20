@@ -141,6 +141,28 @@ describe('Class Decorators', () => {
     await expect(service.method2()).rejects.toThrow(RelayOpenError);
   });
 
+  it('should NOT wrap synchronous methods when using @RelayClass', () => {
+    @RelayClass(relay)
+    class TestService {
+      syncMethod() {
+        return 'sync-result';
+      }
+      
+      async asyncMethod() {
+        return 'async-result';
+      }
+    }
+
+    const service = new TestService();
+    
+    // Synchronous method should return value directly, not a Promise
+    const result = service.syncMethod();
+    expect(result).toBe('sync-result');
+    
+    // Async method should be wrapped and return a Promise
+    expect(service.asyncMethod()).toBeInstanceOf(Promise);
+  });
+
   it('should use fallback class with @FallbackClass', async () => {
 
     class FallbackService {
@@ -419,8 +441,34 @@ describe('Class-level @UseRelay', () => {
     await service.getData();
     expect(constructorCount).toBe(1);
 
-    // Second failure
     await service.getData();
     expect(constructorCount).toBe(1);
+  });
+
+  it('should NOT wrap synchronous methods when using @FallbackClass', () => {
+    class FallbackService {
+      syncMethod() { return 'fallback-sync'; }
+      async asyncMethod() { return 'fallback-async'; }
+    }
+
+    @FallbackClass(FallbackService)
+    class PrimaryService {
+      syncMethod() {
+        return 'sync-result';
+      }
+      
+      async asyncMethod() {
+        return 'async-result';
+      }
+    }
+
+    const service = new PrimaryService();
+    
+    // Synchronous method should return value directly, not a Promise
+    const result = service.syncMethod();
+    expect(result).toBe('sync-result');
+    
+    // Async method should be wrapped and return a Promise
+    expect(service.asyncMethod()).toBeInstanceOf(Promise);
   });
 });

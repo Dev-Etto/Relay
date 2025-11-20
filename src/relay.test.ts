@@ -346,6 +346,19 @@ describe('Relay Register', () => {
     
     await expect(relay.run(p.exec)).resolves.toBe('fallback');
   });
+
+  it('should use registered fallback for object literals', async () => {
+    const primary = {
+      async exec() { throw new Error('fail'); }
+    };
+    const fallback = {
+      async exec() { return 'fallback'; }
+    };
+
+    relay.register(primary, fallback);
+    
+    await expect(relay.run(primary.exec)).resolves.toBe('fallback');
+  });
 });
 
 describe('Relay Cleanup', () => {
