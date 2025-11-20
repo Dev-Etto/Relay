@@ -35,12 +35,12 @@ import { Relay } from '../relay';
  *   async fetchData() { ... }
  * }
  */
-export function UseRelay(relay?: Relay) {
+export function UseRelay(relay?: Relay): any {
   return function (
     target: any,
     propertyKey?: string,
     descriptor?: PropertyDescriptor
-  ) {
+  ): any {
     const relayInstance = relay || Relay.getDefault();
 
     if (descriptor && propertyKey) {

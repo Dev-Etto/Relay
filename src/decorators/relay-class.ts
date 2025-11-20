@@ -4,8 +4,8 @@ import { Relay } from '../relay';
  * Class decorator to protect all async methods with a Relay (Circuit Breaker).
  * @param relay The Relay instance to use.
  */
-export function RelayClass(relay: Relay) {
-  return function <T extends { new (...args: any[]): {} }>(constructor: T) {
+export function RelayClass(relay: Relay): any {
+  return function <T extends { new (...args: any[]): {} }>(constructor: T): any {
     const prototype = constructor.prototype;
     const methodNames = Object.getOwnPropertyNames(prototype);
 

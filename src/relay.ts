@@ -21,7 +21,7 @@ export class Relay<TFallback = any> extends EventEmitter {
   #coolDownTimer: NodeJS.Timeout | null = null;
 
   readonly #options: InternalOptions<TFallback>;
-  #fallbackRegistry = new Map<Function, Function>();
+  #fallbackRegistry = new Map<(...args: any[]) => any, (...args: any[]) => any>();
 
   constructor(options: RelayOptions<TFallback> = {}) {
     super();
@@ -64,6 +64,17 @@ export class Relay<TFallback = any> extends EventEmitter {
    */
   public static clearDefault(): void {
     Relay.defaultInstance = null;
+  }
+
+  /**
+   * Cleans up any pending timers.
+   * Useful for test cleanup to prevent resource leaks.
+   */
+  public cleanup(): void {
+    if (this.#coolDownTimer) {
+      clearTimeout(this.#coolDownTimer);
+      this.#coolDownTimer = null;
+    }
   }
 
   /**

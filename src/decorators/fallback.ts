@@ -3,12 +3,12 @@
  * Decorator to define a fallback method in case of failure.
  * @param fallback A method name (string) on the same class, or a standalone function.
  */
-export function Fallback(fallback: string | ((error: Error, ...args: any[]) => any)) {
+export function Fallback(fallback: string | ((error: Error, ...args: any[]) => any)): any {
   return function (
     target: any,
     propertyKey: string,
     descriptor: PropertyDescriptor
-  ) {
+  ): any {
     const originalMethod = descriptor.value;
 
     descriptor.value = async function (...args: any[]) {
